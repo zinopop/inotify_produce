@@ -17,7 +17,7 @@ cbuild
 */.DS_Store
 main
 .vscode
-*.exe
+#*.exe
 tmp
 public/resource/pub_upload/
 packed/
