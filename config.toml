@@ -1,0 +1,15 @@
+# 静态文件任务相关配置
+[static]
+    [static.ssh]
+        ip = "192.168.18.44"
+        port = "22"
+        user = "root"
+        pass = "1q2w3e4r"
+    [static.dir]
+        # 远程目录
+        remoteDir = "/zhq/Medias"
+        # 本地备份目录
+        localBakDir = "D:\\Workspace\\golang\\src\\inotify_produce\\file\\static"
+        # 存放目标目录
+        targetDir = "\\\\191.191.191.174\\data2021"
+
