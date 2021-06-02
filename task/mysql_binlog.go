@@ -30,22 +30,22 @@ func init() {
 
 func (m *mysqlBinlog) CreateFile(ch chan string) {
 	for {
-		result2, _ := g.Redis().DoVar("KEYS", "messages*")
-		result2_array := result2.Array()
-		other_key := []string{"contacts", "medias", "targets", "users"}
+		result, _ := g.Redis().DoVar("KEYS", "messages*")
+		resultArray := result.Array()
+		otherKey := []string{"contacts", "medias", "targets", "users"}
 
-		for _, vv := range other_key {
+		for _, vv := range otherKey {
 			if key, _ := g.Redis().DoVar("KEYS", vv); len(key.Array()) > 0 {
-				result2_array = append(result2_array, vv)
+				resultArray = append(resultArray, vv)
 			}
 		}
-		if len(result2_array) <= 0 {
-			fmt.Println("done empty")
-			time.Sleep(time.Second * 2)
+		if len(resultArray) <= 0 {
+			fmt.Println("binlog empty next loop after 2 Minute")
+			time.Sleep(time.Minute * 2)
 			continue
 		}
-		wg.Add(len(result2_array))
-		for index, val := range result2_array {
+		wg.Add(len(resultArray))
+		for index, val := range resultArray {
 			ch := make(chan int)
 			go createFile(gconv.String(val), ch)
 			ch <- index
@@ -61,31 +61,33 @@ func createFile(key string, ic chan int) {
 	fileTmpNameArray := make([]string, 0)
 	zipFileObj := make([]*os.File, 0)
 	bakDir := g.Cfg().GetString("mysql.dir.localBakDir")
+
+	// 创建文件
+	createTmpMethod := func() {
+		fileTmpName := bakDir + "\\" + gconv.String(gtime.Timestamp()) + "-" + key + ".binlog"
+		file, err := os.Create(fileTmpName)
+		if err != nil {
+			fmt.Println("create err", err)
+		}
+		fileTmpNameArray = append(fileTmpNameArray, fileTmpName)
+		file.WriteString(writeString)
+		file.Close()
+	}
+	// 初始化阈值
+	initLoopMethod := func() {
+		insertNum = 0
+		writeString = ""
+	}
+
 	for {
 		result, _ := g.Redis().DoVar("LPOP", key)
-
 		if insertNum == g.Cfg().GetInt("mysql.dir.rowSize") {
-			fileTmpName := bakDir + "\\" + gconv.String(gtime.Timestamp()) + "-" + key + ".binlog"
-			file, err := os.Create(fileTmpName)
-			if err != nil {
-				fmt.Println("create err", err)
-			}
-			fileTmpNameArray = append(fileTmpNameArray, fileTmpName)
-			file.WriteString(writeString)
-			file.Close()
-			insertNum = 0
-			writeString = ""
+			createTmpMethod()
+			initLoopMethod()
 			continue
 		}
 		if result.String() == "" && insertNum != 0 {
-			fileTmpName := bakDir + "\\" + gconv.String(gtime.Timestamp()) + "-" + key + ".binlog"
-			file, err := os.Create(fileTmpName)
-			if err != nil {
-				fmt.Println("create2 done err", err)
-			}
-			fileTmpNameArray = append(fileTmpNameArray, fileTmpName)
-			file.WriteString(writeString)
-			file.Close()
+			createTmpMethod()
 			break
 		}
 		writeString += result.String() + "\n"

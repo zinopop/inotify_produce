@@ -86,8 +86,8 @@ func (s *static) CreateFile(ch chan string) {
 		}
 
 		if len(fileInfos) <= 0 {
-			fmt.Println("loop文件为空:", err)
-			time.Sleep(5 * time.Minute)
+			fmt.Println("static empty next loop after 2 Minute")
+			time.Sleep(2 * time.Minute)
 			continue
 		}
 
@@ -126,8 +126,9 @@ func handleFile(fileNames []string) {
 			fmt.Println("写入临时文件失败", err)
 			continue
 		}
-		localFileNames = append(localFileNames, g.Cfg().GetString("static.dir.localBakDir")+"\\"+path.Base(val))
 		srcFile.Close()
+		localFileNames = append(localFileNames, g.Cfg().GetString("static.dir.localBakDir")+"\\"+path.Base(val))
+
 		dstFile.Close()
 		if err := sftpClient.Remove(val); err != nil {
 			fmt.Println("远程删除失败", err)

@@ -11,6 +11,7 @@ func main() {
 
 	g.Cfg().SetFileName("config.toml")
 
+	// 注入任务
 	taskChan := taskInit(
 		task.StaticFile.CreateFile,
 		task.MysqlBinlog.CreateFile,
