@@ -7,7 +7,6 @@ import (
 	"github.com/gogf/gf/util/gconv"
 	"github.com/pkg/sftp"
 	"inotify_produce/lib"
-	"io"
 	"log"
 	"net"
 	"os"
@@ -152,7 +151,7 @@ func handleFile(fileNames []string) {
 			fmt.Println("压缩失败,", err)
 		}
 		fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+".zip.dat")
-		nBytes, err := copyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+date+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+".zip.dat")
+		nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+date+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+".zip.dat")
 		if err != nil {
 			fmt.Printf("Copied %d bytes!\n", nBytes)
 		}
@@ -198,30 +197,4 @@ func LoopHandelRemoteFile(file string) *sftp.File {
 		return file
 	}(file)
 	return loop
-}
-
-func copyFile(src, dst string) (int64, error) {
-	sourceFileStat, err := os.Stat(src)
-
-	if err != nil {
-		return 0, err
-	}
-
-	if !sourceFileStat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
-	}
-
-	source, err := os.Open(src)
-	if err != nil {
-		return 0, err
-	}
-	defer source.Close()
-
-	destination, err := os.Create(dst)
-	if err != nil {
-		return 0, err
-	}
-	defer destination.Close()
-	nBytes, err := io.CopyN(destination, source, sourceFileStat.Size())
-	return nBytes, err
 }

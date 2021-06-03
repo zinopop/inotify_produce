@@ -30,7 +30,11 @@ func init() {
 
 func (m *mysqlBinlog) CreateFile(ch chan string) {
 	for {
-		result, _ := g.Redis().DoVar("KEYS", "messages*")
+		result, err := g.Redis().DoVar("KEYS", "messages*")
+		if err != nil {
+			fmt.Println("redis:", err)
+			ch <- "创建binlog失败"
+		}
 		resultArray := result.Array()
 		otherKey := []string{"contacts", "medias", "targets", "users"}
 
@@ -102,7 +106,8 @@ func createFile(key string, ic chan int) {
 	}
 
 	if len(zipFileObj) > 0 {
-		zipName := g.Cfg().GetString("mysql.dir.localBakDir") + "\\mysql_binlog_" + gconv.String(gtime.Timestamp()) + ".zip"
+		fileName := "mysql_binlog_" + gconv.String(gtime.Timestamp()) + ".zip"
+		zipName := g.Cfg().GetString("mysql.dir.localBakDir") + "\\" + fileName
 		compreFile, err := os.Create(zipName)
 		if err == nil {
 			fmt.Println("开始压缩", zipName)
@@ -111,6 +116,15 @@ func createFile(key string, ic chan int) {
 			}
 			fmt.Println("压缩完成", zipName)
 		}
+
+		fmt.Println("开始拷贝", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName)
+		if nBytes, err := lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat"); err != nil {
+			fmt.Printf("Copied %d bytes!\n", nBytes)
+		}
+		if err := os.Rename(g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName); err != nil {
+			fmt.Println("rename", err)
+		}
+
 		fmt.Println("删除临时文件")
 		for _, val := range fileTmpNameArray {
 			os.Remove(val)
