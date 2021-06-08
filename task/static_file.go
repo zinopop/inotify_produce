@@ -2,6 +2,7 @@ package task
 
 import (
 	"fmt"
+	"github.com/gogf/gf/errors/gerror"
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/os/gtime"
 	"github.com/gogf/gf/util/gconv"
@@ -11,6 +12,7 @@ import (
 	"net"
 	"os"
 	"path"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -24,6 +26,7 @@ var (
 	errGlob    error
 	sftpClient *sftp.Client
 )
+var wgStatic sync.WaitGroup
 
 func init() {
 	ip := g.Cfg().GetString("static.ssh.ip")
@@ -74,8 +77,9 @@ func connect(user, password, host string, port int) (*sftp.Client, error) {
 }
 
 func (s *static) CreateFile(ch chan string) {
-	var tryTime int = 0
+
 	for {
+		var tryTime int = 0
 		fileInfos, err := sftpClient.ReadDir(g.Cfg().GetString("static.dir.remoteDir"))
 		//defer sftpClient.Close()
 		if err != nil {
@@ -91,6 +95,7 @@ func (s *static) CreateFile(ch chan string) {
 		}
 
 		fileTmpArray := make([]string, 0)
+		fileSlice := make([][]string, 0)
 		var sizeTmp int64 = 0
 		for _, val := range fileInfos {
 			// 1gb = 1048576
@@ -103,35 +108,79 @@ func (s *static) CreateFile(ch chan string) {
 				continue
 			}
 			// 处理文件数组
-			go handleFile(fileTmpArray)
+			//handleFile(fileTmpArray)
+			fileSlice = append(fileSlice, fileTmpArray)
 			// 重新初始化处理数组
 			sizeTmp = 0
 			fileTmpArray = nil
 		}
+
+		wgStatic.Add(len(fileSlice))
+		for index, val := range fileSlice {
+			ch := make(chan int)
+			go handleFile(val, ch)
+			ch <- index
+		}
+		wgStatic.Wait()
 	}
 }
 
-func handleFile(fileNames []string) {
+func sftpDown(srcPath, dstPath string) (*os.File, error) {
+	var loop = func(f string) *sftp.File {
+		//var filesize int64
+		file, err := sftpClient.Open(f)
+
+		if err != nil {
+			return nil
+		}
+		//for  {
+		//	fileinfo, err := file.Stat()
+		//	if err != nil {
+		//		return nil
+		//	}
+		//	if fileinfo.Size() != filesize{
+		//		filesize = fileinfo.Size()
+		//		time.Sleep(time.Millisecond*1001)
+		//		continue
+		//	}else{
+		//		break
+		//	}
+		//}
+
+		return file
+	}(srcPath)
+	if loop == nil {
+		return nil, gerror.New("远程文件打开失败")
+	}
+
+	dstFile, err := os.Create(dstPath) //本地
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := loop.WriteTo(dstFile); err != nil {
+		return nil, err
+	}
+	_ = loop.Close()
+	_ = dstFile.Close()
+	return dstFile, nil
+}
+
+func handleFile(fileNames []string, ch chan int) {
 	files := make([]*os.File, 0)
 	localFileNames := make([]string, 0)
 	for _, val := range fileNames {
-		srcFile := LoopHandelRemoteFile(val)
-		dstFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\" + path.Base(val))
+		dstPath := g.Cfg().GetString("static.dir.localBakDir") + "\\" + path.Base(val)
+		_, err := sftpDown(val, dstPath)
 		if err != nil {
-			fmt.Println("创建临时文件失败", err)
+			fmt.Println("远程下载失败", err)
 			continue
 		}
-		if _, err = srcFile.WriteTo(dstFile); err != nil {
-			fmt.Println("写入临时文件失败", err)
-			continue
-		}
-		srcFile.Close()
-		localFileNames = append(localFileNames, g.Cfg().GetString("static.dir.localBakDir")+"\\"+path.Base(val))
-
-		dstFile.Close()
 		if err := sftpClient.Remove(val); err != nil {
 			fmt.Println("远程删除失败", err)
+			continue
 		}
+		localFileNames = append(localFileNames, g.Cfg().GetString("static.dir.localBakDir")+"\\"+path.Base(val))
 	}
 
 	for _, val := range localFileNames {
@@ -141,7 +190,7 @@ func handleFile(fileNames []string) {
 		}
 	}
 
-	date := gconv.String(gtime.Timestamp())
+	date := gconv.String(gtime.TimestampNano())
 
 	compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + date + ".zip")
 
@@ -165,36 +214,7 @@ func handleFile(fileNames []string) {
 	for _, val := range fileNames {
 		os.Remove(g.Cfg().GetString("static.dir.localBakDir") + "\\" + path.Base(val))
 	}
-}
 
-func LoopHandelRemoteFile(file string) *sftp.File {
-	var filesize int64
-	var loop = func(f string) *sftp.File {
-		file, err := sftpClient.Open(f)
-		if err != nil {
-			return nil
-		}
-		for {
-			fileinfo, err := file.Stat()
-			if err != nil {
-				return nil
-			}
-			//if !fileinfo.Mode().IsRegular() {
-			//	continue
-			//}else{
-			//	break
-			//}
-			//fmt.Println("文件大小:",fileinfo.Size())
-			//fmt.Println("文件map大小:",filesize)
-			if fileinfo.Size() != filesize {
-				filesize = fileinfo.Size()
-				time.Sleep(time.Millisecond * 1001)
-				continue
-			} else {
-				break
-			}
-		}
-		return file
-	}(file)
-	return loop
+	fmt.Println(<-ch)
+	wgStatic.Done()
 }

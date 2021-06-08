@@ -68,7 +68,7 @@ func createFile(key string, ic chan int) {
 
 	// 创建文件
 	createTmpMethod := func() {
-		fileTmpName := bakDir + "\\" + gconv.String(gtime.Timestamp()) + "-" + key + ".binlog"
+		fileTmpName := bakDir + "\\" + gconv.String(gtime.TimestampNano()) + "-" + key + ".binlog"
 		file, err := os.Create(fileTmpName)
 		if err != nil {
 			fmt.Println("create err", err)
@@ -106,7 +106,7 @@ func createFile(key string, ic chan int) {
 	}
 
 	if len(zipFileObj) > 0 {
-		fileName := "mysql_binlog_" + gconv.String(gtime.Timestamp()) + ".zip"
+		fileName := "mysql_binlog_" + gconv.String(gtime.TimestampNano()) + ".zip"
 		zipName := g.Cfg().GetString("mysql.dir.localBakDir") + "\\" + fileName
 		compreFile, err := os.Create(zipName)
 		if err == nil {
