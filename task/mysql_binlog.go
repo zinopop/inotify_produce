@@ -106,7 +106,7 @@ func createFile(key string, ic chan int) {
 	}
 
 	if len(zipFileObj) > 0 {
-		fileName := "mysql_binlog_" + gconv.String(gtime.TimestampNano()) + ".zip"
+		fileName := "mysql_binlog_" + gconv.String(gtime.TimestampNano()) + "_" + lib.Common.ScalerDay("binlog") + ".zip"
 		zipName := g.Cfg().GetString("mysql.dir.localBakDir") + "\\" + fileName
 		compreFile, err := os.Create(zipName)
 		if err == nil {

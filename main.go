@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	g.Cfg().SetFileName("config.toml")
 
 	// 注入任务
