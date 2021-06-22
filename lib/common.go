@@ -3,9 +3,9 @@ package lib
 import (
 	"fmt"
 	"github.com/gogf/gf/os/gtime"
-	"github.com/gogf/gf/util/gconv"
 	"io"
 	"os"
+	"time"
 )
 
 var Common = new(common)
@@ -41,19 +41,20 @@ func (c *common) CopyFile(src, dst string) (int64, error) {
 // 计数器按天和顺序计数
 var binlogNum = 1
 var staticNum = 1
+var datetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
 
 func (c *common) ScalerDay(taskName string) string {
 	var s string
 	if taskName == "binlog" {
-		s = gtime.Now().Format("Y_m_d") + "_" + gconv.String(binlogNum)
+		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogNum)
 		binlogNum++
 	} else if taskName == "static" {
-		s = gtime.Now().Format("Y_m_d") + "_" + gconv.String(staticNum)
+		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogNum)
 		staticNum++
 	}
-	if binlogNum == 90000 {
+	if binlogNum == 90000 || gtime.Timestamp() > datetime {
 		binlogNum = 1
-	} else if staticNum == 90000 {
+	} else if staticNum == 90000 || gtime.Timestamp() > datetime {
 		staticNum = 1
 	}
 	return s
