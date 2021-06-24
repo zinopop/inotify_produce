@@ -41,7 +41,8 @@ func (c *common) CopyFile(src, dst string) (int64, error) {
 // 计数器按天和顺序计数
 var binlogNum = 1
 var staticNum = 1
-var datetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
+var binlogDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
+var staticDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
 
 func (c *common) ScalerDay(taskName string) string {
 	var s string
@@ -49,13 +50,15 @@ func (c *common) ScalerDay(taskName string) string {
 		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogNum)
 		binlogNum++
 	} else if taskName == "static" {
-		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogNum)
+		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", staticNum)
 		staticNum++
 	}
-	if binlogNum == 90000 || gtime.Timestamp() > datetime {
+	if binlogNum == 90000 || gtime.Timestamp() > binlogDatetime {
 		binlogNum = 1
-	} else if staticNum == 90000 || gtime.Timestamp() > datetime {
+		binlogDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
+	} else if staticNum == 90000 || gtime.Timestamp() > staticDatetime {
 		staticNum = 1
+		staticDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
 	}
 	return s
 }
