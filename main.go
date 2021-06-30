@@ -8,10 +8,7 @@ import (
 )
 
 func main() {
-	//for{
-	//	fmt.Println(lib.Common.ScalerDay("binlog"))
-	//	time.Sleep(time.Second*2)
-	//}
+
 	g.Cfg().SetFileName("config.toml")
 
 	// 注入任务

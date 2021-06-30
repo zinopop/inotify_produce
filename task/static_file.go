@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gogf/gf/errors/gerror"
 	"github.com/gogf/gf/frame/g"
-	"github.com/gogf/gf/os/gtime"
 	"github.com/gogf/gf/util/gconv"
 	"github.com/pkg/sftp"
 	"inotify_produce/lib"
@@ -190,23 +189,24 @@ func handleFile(fileNames []string, ch chan int) {
 		}
 	}
 	s := lib.Common.ScalerDay("static")
-	date := gconv.String(gtime.TimestampNano())
+	//date := gconv.String(gtime.TimestampNano())
 
-	compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + date + "_" + s + ".zip")
+	//compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + date + "_" + s + ".zip")
+	compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + s + ".zip")
 
 	if err == nil {
 
-		fmt.Println("开始压缩", g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+date+"_"+s+".zip")
+		fmt.Println("开始压缩", g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip")
 		if err := lib.Zip.Compress(files, compreFile); err != nil {
 			fmt.Println("压缩失败,", err)
 		}
-		fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+"_"+s+".zip.dat")
-		nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+date+"_"+s+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+"_"+s+".zip.dat")
+		fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
+		nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
 		if err != nil {
 			fmt.Printf("Copied %d bytes!\n", nBytes)
 		}
-		fmt.Println("开始重命名", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+"_"+s+".zip")
-		if err := os.Rename(g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+"_"+s+".zip.dat", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+date+"_"+s+".zip"); err != nil {
+		fmt.Println("开始重命名", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip")
+		if err := os.Rename(g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip"); err != nil {
 			fmt.Println("rename", err)
 		}
 	}

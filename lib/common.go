@@ -2,10 +2,10 @@ package lib
 
 import (
 	"fmt"
+	"github.com/gogf/gf/container/gtype"
 	"github.com/gogf/gf/os/gtime"
 	"io"
 	"os"
-	"time"
 )
 
 var Common = new(common)
@@ -39,26 +39,28 @@ func (c *common) CopyFile(src, dst string) (int64, error) {
 }
 
 // 计数器按天和顺序计数
-var binlogNum = 1
-var staticNum = 1
-var binlogDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
-var staticDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
+var binlogIntSafe = gtype.NewInt()
+var staticIntSafe = gtype.NewInt()
+
+var binlogDatetime = gtime.Now().Timestamp()
+var staticDatetime = gtime.Now().Timestamp()
 
 func (c *common) ScalerDay(taskName string) string {
 	var s string
 	if taskName == "binlog" {
-		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogNum)
-		binlogNum++
+		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogIntSafe.Val())
+		binlogIntSafe.Add(+1)
 	} else if taskName == "static" {
-		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", staticNum)
-		staticNum++
+		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", staticIntSafe.Val())
+		staticIntSafe.Add(+1)
 	}
-	if binlogNum == 90000 || gtime.Timestamp() > binlogDatetime {
-		binlogNum = 1
-		binlogDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
-	} else if staticNum == 90000 || gtime.Timestamp() > staticDatetime {
-		staticNum = 1
-		staticDatetime = gtime.Now().Add(+time.Hour * 24).Timestamp()
+
+	if binlogIntSafe.Val() == 90000 || gtime.Now().Format("d") != gtime.New(binlogDatetime).Format("d") {
+		binlogIntSafe = gtype.NewInt()
+		binlogDatetime = gtime.Now().Timestamp()
+	} else if staticIntSafe.Val() == 90000 || gtime.Now().Format("d") != gtime.New(staticDatetime).Format("d") {
+		staticIntSafe = gtype.NewInt()
+		staticDatetime = gtime.Now().Timestamp()
 	}
 	return s
 }
