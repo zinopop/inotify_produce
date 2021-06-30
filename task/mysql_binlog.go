@@ -121,6 +121,8 @@ func createFile(key string, ic chan int) {
 		fmt.Println("开始拷贝", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName)
 		if nBytes, err := lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat"); err != nil {
 			fmt.Printf("Copied %d bytes!\n", nBytes)
+			//失败后拷贝
+			lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.failDir")+"\\"+fileName)
 		}
 		if err := os.Rename(g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName); err != nil {
 			fmt.Println("rename", err)

@@ -203,6 +203,8 @@ func handleFile(fileNames []string, ch chan int) {
 		fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
 		nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
 		if err != nil {
+			// 失败拷贝
+			lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.failDir")+"\\static_"+s+".zip")
 			fmt.Printf("Copied %d bytes!\n", nBytes)
 		}
 		fmt.Println("开始重命名", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip")
