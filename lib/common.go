@@ -8,7 +8,12 @@ import (
 	"os"
 )
 
+// 计数器按天和顺序计数
 var Common = new(common)
+var binlogIntSafe = gtype.NewInt()
+var staticIntSafe = gtype.NewInt()
+var binlogDatetime = gtime.Now().Timestamp()
+var staticDatetime = gtime.Now().Timestamp()
 
 type common struct{}
 
@@ -37,12 +42,6 @@ func (c *common) CopyFile(src, dst string) (int64, error) {
 	nBytes, err := io.CopyN(destination, source, sourceFileStat.Size())
 	return nBytes, err
 }
-
-// 计数器按天和顺序计数
-var binlogIntSafe = gtype.NewInt()
-var staticIntSafe = gtype.NewInt()
-var binlogDatetime = gtime.Now().Timestamp()
-var staticDatetime = gtime.Now().Timestamp()
 
 func (c *common) ScalerDay(taskName string) string {
 	switch taskName {
