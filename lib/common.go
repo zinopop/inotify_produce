@@ -41,26 +41,32 @@ func (c *common) CopyFile(src, dst string) (int64, error) {
 // 计数器按天和顺序计数
 var binlogIntSafe = gtype.NewInt()
 var staticIntSafe = gtype.NewInt()
-
 var binlogDatetime = gtime.Now().Timestamp()
 var staticDatetime = gtime.Now().Timestamp()
 
 func (c *common) ScalerDay(taskName string) string {
-	var s string
-	if taskName == "binlog" {
-		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogIntSafe.Val())
-		binlogIntSafe.Add(+1)
-	} else if taskName == "static" {
-		s = gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", staticIntSafe.Val())
-		staticIntSafe.Add(+1)
+	switch taskName {
+	case "binlog":
+		defer func() {
+			if binlogIntSafe.Val() >= 90000 || gtime.Now().Format("d") != gtime.New(binlogDatetime).Format("d") {
+				binlogIntSafe = gtype.NewInt()
+				binlogDatetime = gtime.Now().Timestamp()
+			} else {
+				binlogIntSafe.Add(+1)
+			}
+		}()
+		return gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogIntSafe.Val())
+	case "static":
+		defer func() {
+			if staticIntSafe.Val() >= 90000 || gtime.Now().Format("d") != gtime.New(staticDatetime).Format("d") {
+				staticIntSafe = gtype.NewInt()
+				staticDatetime = gtime.Now().Timestamp()
+			} else {
+				staticIntSafe.Add(+1)
+			}
+		}()
+		return gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", staticIntSafe.Val())
+	default:
+		return ""
 	}
-
-	if binlogIntSafe.Val() == 90000 || gtime.Now().Format("d") != gtime.New(binlogDatetime).Format("d") {
-		binlogIntSafe = gtype.NewInt()
-		binlogDatetime = gtime.Now().Timestamp()
-	} else if staticIntSafe.Val() == 90000 || gtime.Now().Format("d") != gtime.New(staticDatetime).Format("d") {
-		staticIntSafe = gtype.NewInt()
-		staticDatetime = gtime.Now().Timestamp()
-	}
-	return s
 }

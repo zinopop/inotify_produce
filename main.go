@@ -9,6 +9,12 @@ import (
 
 func main() {
 
+	//for  {
+	//	//time.Sleep(time.Second * 1)
+	//	fmt.Println("binglog",lib.Common.ScalerDay("binlog"))
+	//	fmt.Println("static",lib.Common.ScalerDay("static"))
+	//}
+
 	g.Cfg().SetFileName("config.toml")
 
 	// 注入任务
