@@ -36,7 +36,7 @@ func (m *mysqlBinlog) CreateFile(ch chan string) {
 			ch <- "创建binlog失败"
 		}
 		resultArray := result.Array()
-		otherKey := []string{"contacts", "medias", "targets", "users"}
+		otherKey := []string{"contacts", "medias", "targets", "users", "grouplist"}
 
 		for _, vv := range otherKey {
 			if key, _ := g.Redis().DoVar("KEYS", vv); len(key.Array()) > 0 {
