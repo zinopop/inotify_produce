@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/container/gtype"
 	"github.com/gogf/gf/os/gtime"
+	"github.com/gogf/gf/util/guid"
 	"io"
 	"os"
 )
@@ -54,7 +55,7 @@ func (c *common) ScalerDay(taskName string) string {
 				binlogIntSafe.Add(+1)
 			}
 		}()
-		return gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogIntSafe.Val())
+		return guid.S() + "_" + gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", binlogIntSafe.Val())
 	case "static":
 		defer func() {
 			if staticIntSafe.Val() >= 90000 || gtime.Now().Format("d") != gtime.New(staticDatetime).Format("d") {
@@ -64,8 +65,8 @@ func (c *common) ScalerDay(taskName string) string {
 				staticIntSafe.Add(+1)
 			}
 		}()
-		return gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", staticIntSafe.Val())
+		return guid.S() + "_" + gtime.Now().Format("Y_m_d") + "_" + fmt.Sprintf("%05d", staticIntSafe.Val())
 	default:
-		return ""
+		return guid.S()
 	}
 }
