@@ -166,7 +166,7 @@ func sftpDown(srcPath, dstPath string) (*os.File, error) {
 }
 
 func handleFile(fileNames []string, ch chan int) {
-	files := make([]*os.File, 0)
+
 	localFileNames := make([]string, 0)
 	for _, val := range fileNames {
 		dstPath := g.Cfg().GetString("static.dir.localBakDir") + "\\" + path.Base(val)
@@ -182,6 +182,33 @@ func handleFile(fileNames []string, ch chan int) {
 		localFileNames = append(localFileNames, g.Cfg().GetString("static.dir.localBakDir")+"\\"+path.Base(val))
 	}
 
+	/*******************************************新版带密码开始*********************************************/
+	//if len(localFileNames) > 0 {
+	//	s := lib.Common.ScalerDay("static")
+	//	zipFileName := g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + s + ".zip"
+	//
+	//	fmt.Println("开始压缩", g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip")
+	//	if err := lib.ZipPlus.Zip(zipFileName,g.Cfg().GetString("zip.password"),localFileNames);err != nil {
+	//		fmt.Println(err)
+	//	}
+	//
+	//	fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
+	//	nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
+	//	if err != nil {
+	//		// 失败拷贝
+	//		lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.failDir")+"\\static_"+s+".zip")
+	//		fmt.Printf("Copied %d bytes!\n", nBytes)
+	//	}
+	//
+	//	fmt.Println("开始重命名", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip")
+	//	if err := os.Rename(g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip"); err != nil {
+	//		fmt.Println("rename", err)
+	//	}
+	//}
+	/*******************************************新版带密码结束*********************************************/
+
+	/*******************************************不带密码开始*********************************************/
+	files := make([]*os.File, 0)
 	for _, val := range localFileNames {
 		file, err := os.Open(val)
 		if err == nil {
@@ -189,9 +216,6 @@ func handleFile(fileNames []string, ch chan int) {
 		}
 	}
 	s := lib.Common.ScalerDay("static")
-	//date := gconv.String(gtime.TimestampNano())
-
-	//compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + date + "_" + s + ".zip")
 	compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + s + ".zip")
 
 	if err == nil {
@@ -212,6 +236,7 @@ func handleFile(fileNames []string, ch chan int) {
 			fmt.Println("rename", err)
 		}
 	}
+	/*******************************************不带密码结束*********************************************/
 
 	fmt.Println("删除临时文件")
 	for _, val := range fileNames {

@@ -2,6 +2,7 @@ package lib
 
 import (
 	"archive/zip"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -52,4 +53,19 @@ func compressZip(file *os.File, zw *zip.Writer) error {
 		return err
 	}
 	return nil
+}
+
+func IsZip(zipPath string) bool {
+	f, err := os.Open(zipPath)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	buf := make([]byte, 4)
+	if n, err := f.Read(buf); err != nil || n < 4 {
+		return false
+	}
+
+	return bytes.Equal(buf, []byte("PK\x03\x04"))
 }

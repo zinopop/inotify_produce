@@ -12,6 +12,7 @@
         localBakDir = "D:\\Workspace\\golang\\src\\inotify_produce\\file\\static"
         # 存放目标目录
         targetDir = "\\\\191.191.191.174\\data2021"
+#        targetDir = "D:\\tag"
         # 失败拷贝目录
         failDir = "D:\\Workspace\\golang\\src\\inotify_produce\\file\\fail\\static"
 # mysql binlog文件生产配置
@@ -28,9 +29,13 @@
         rowSize = 1000
         # 目标目录
         targetDir = "\\\\191.191.191.174\\data2021"
+#        targetDir = "D:\\tag"
         # 本地备份目录
         localBakDir = "D:\\Workspace\\golang\\src\\inotify_produce\\file\\binlog"
         # 失败拷贝目录
         failDir = "D:\\Workspace\\golang\\src\\inotify_produce\\file\\fail\\binlog"
+# 压缩包密码配置
+[zip]
+    password = "123456"
 
 
