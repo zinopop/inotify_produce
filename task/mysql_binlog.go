@@ -99,59 +99,15 @@ func createFile(key string, ic chan int) {
 	}
 
 	/*******************************************新版带密码开始*********************************************/
-	//if len(fileTmpNameArray) > 0 {
-	//	fileName := "mysql_binlog_" + lib.Common.ScalerDay("binlog") + ".zip"
-	//	zipName := g.Cfg().GetString("mysql.dir.localBakDir") + "\\" + fileName
-	//	fmt.Println("开始压缩", zipName)
-	//	err := lib.ZipPlus.Zip(zipName,g.Cfg().GetString("zip.password"),fileTmpNameArray)
-	//	if err != nil {
-	//		fmt.Println("压缩失败,", err)
-	//	}
-	//	fmt.Println("压缩完成", zipName)
-	//	fmt.Println("开始拷贝", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName)
-	//	if nBytes, err := lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat"); err != nil {
-	//		fmt.Printf("Copied %d bytes!\n", nBytes)
-	//		//失败后拷贝
-	//		lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.failDir")+"\\"+fileName)
-	//	}
-	//	if err := os.Rename(g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName); err != nil {
-	//		fmt.Println("rename", err)
-	//	}
-	//
-	//	fmt.Println("删除临时文件")
-	//	for _, val := range fileTmpNameArray {
-	//		os.Remove(val)
-	//	}
-	//}else{
-	//	fmt.Println("没有压缩的文件")
-	//}
-	/*******************************************新版带密码结束*********************************************/
-
-	/*******************************************不带密码开始*********************************************/
-	zipFileObj := make([]*os.File, 0)
-	for _, val := range fileTmpNameArray {
-		file, err := os.Open(val)
-		if err == nil {
-			zipFileObj = append(zipFileObj, file)
-		}
-	}
-
-	if len(zipFileObj) > 0 {
-		//fileName := "mysql_binlog_" + gconv.String(gtime.TimestampNano()) + "_" + lib.Common.ScalerDay("binlog") + ".zip"
+	if len(fileTmpNameArray) > 0 {
 		fileName := "mysql_binlog_" + lib.Common.ScalerDay("binlog") + ".zip"
 		zipName := g.Cfg().GetString("mysql.dir.localBakDir") + "\\" + fileName
-
-		// 压缩部分开始
-		compreFile, err := os.Create(zipName)
-		if err == nil {
-			fmt.Println("开始压缩", zipName)
-			if err := lib.Zip.Compress(zipFileObj, compreFile); err != nil {
-				fmt.Println("压缩失败,", err)
-			}
-			fmt.Println("压缩完成", zipName)
+		fmt.Println("开始压缩", zipName)
+		err := lib.ZipPlus.Zip(zipName, g.Cfg().GetString("zip.password"), fileTmpNameArray)
+		if err != nil {
+			fmt.Println("压缩失败,", err)
 		}
-		// 压缩部分开始
-
+		fmt.Println("压缩完成", zipName)
 		fmt.Println("开始拷贝", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName)
 		if nBytes, err := lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat"); err != nil {
 			fmt.Printf("Copied %d bytes!\n", nBytes)
@@ -169,6 +125,50 @@ func createFile(key string, ic chan int) {
 	} else {
 		fmt.Println("没有压缩的文件")
 	}
+	/*******************************************新版带密码结束*********************************************/
+
+	/*******************************************不带密码开始*********************************************/
+	//zipFileObj := make([]*os.File, 0)
+	//for _, val := range fileTmpNameArray {
+	//	file, err := os.Open(val)
+	//	if err == nil {
+	//		zipFileObj = append(zipFileObj, file)
+	//	}
+	//}
+	//
+	//if len(zipFileObj) > 0 {
+	//	//fileName := "mysql_binlog_" + gconv.String(gtime.TimestampNano()) + "_" + lib.Common.ScalerDay("binlog") + ".zip"
+	//	fileName := "mysql_binlog_" + lib.Common.ScalerDay("binlog") + ".zip"
+	//	zipName := g.Cfg().GetString("mysql.dir.localBakDir") + "\\" + fileName
+	//
+	//	// 压缩部分开始
+	//	compreFile, err := os.Create(zipName)
+	//	if err == nil {
+	//		fmt.Println("开始压缩", zipName)
+	//		if err := lib.Zip.Compress(zipFileObj, compreFile); err != nil {
+	//			fmt.Println("压缩失败,", err)
+	//		}
+	//		fmt.Println("压缩完成", zipName)
+	//	}
+	//	// 压缩部分开始
+	//
+	//	fmt.Println("开始拷贝", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName)
+	//	if nBytes, err := lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat"); err != nil {
+	//		fmt.Printf("Copied %d bytes!\n", nBytes)
+	//		//失败后拷贝
+	//		lib.Common.CopyFile(zipName, g.Cfg().GetString("mysql.dir.failDir")+"\\"+fileName)
+	//	}
+	//	if err := os.Rename(g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName+".dat", g.Cfg().GetString("mysql.dir.targetDir")+"\\"+fileName); err != nil {
+	//		fmt.Println("rename", err)
+	//	}
+	//
+	//	fmt.Println("删除临时文件")
+	//	for _, val := range fileTmpNameArray {
+	//		os.Remove(val)
+	//	}
+	//} else {
+	//	fmt.Println("没有压缩的文件")
+	//}
 	/*******************************************不带密码结束*********************************************/
 
 	fmt.Println(<-ic)

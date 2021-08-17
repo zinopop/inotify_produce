@@ -183,47 +183,15 @@ func handleFile(fileNames []string, ch chan int) {
 	}
 
 	/*******************************************新版带密码开始*********************************************/
-	//if len(localFileNames) > 0 {
-	//	s := lib.Common.ScalerDay("static")
-	//	zipFileName := g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + s + ".zip"
-	//
-	//	fmt.Println("开始压缩", g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip")
-	//	if err := lib.ZipPlus.Zip(zipFileName,g.Cfg().GetString("zip.password"),localFileNames);err != nil {
-	//		fmt.Println(err)
-	//	}
-	//
-	//	fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
-	//	nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
-	//	if err != nil {
-	//		// 失败拷贝
-	//		lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.failDir")+"\\static_"+s+".zip")
-	//		fmt.Printf("Copied %d bytes!\n", nBytes)
-	//	}
-	//
-	//	fmt.Println("开始重命名", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip")
-	//	if err := os.Rename(g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip"); err != nil {
-	//		fmt.Println("rename", err)
-	//	}
-	//}
-	/*******************************************新版带密码结束*********************************************/
-
-	/*******************************************不带密码开始*********************************************/
-	files := make([]*os.File, 0)
-	for _, val := range localFileNames {
-		file, err := os.Open(val)
-		if err == nil {
-			files = append(files, file)
-		}
-	}
-	s := lib.Common.ScalerDay("static")
-	compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + s + ".zip")
-
-	if err == nil {
+	if len(localFileNames) > 0 {
+		s := lib.Common.ScalerDay("static")
+		zipFileName := g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + s + ".zip"
 
 		fmt.Println("开始压缩", g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip")
-		if err := lib.Zip.Compress(files, compreFile); err != nil {
-			fmt.Println("压缩失败,", err)
+		if err := lib.ZipPlus.Zip(zipFileName, g.Cfg().GetString("zip.password"), localFileNames); err != nil {
+			fmt.Println(err)
 		}
+
 		fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
 		nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
 		if err != nil {
@@ -231,11 +199,43 @@ func handleFile(fileNames []string, ch chan int) {
 			lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.failDir")+"\\static_"+s+".zip")
 			fmt.Printf("Copied %d bytes!\n", nBytes)
 		}
+
 		fmt.Println("开始重命名", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip")
 		if err := os.Rename(g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip"); err != nil {
 			fmt.Println("rename", err)
 		}
 	}
+	/*******************************************新版带密码结束*********************************************/
+
+	/*******************************************不带密码开始*********************************************/
+	//files := make([]*os.File, 0)
+	//for _, val := range localFileNames {
+	//	file, err := os.Open(val)
+	//	if err == nil {
+	//		files = append(files, file)
+	//	}
+	//}
+	//s := lib.Common.ScalerDay("static")
+	//compreFile, err := os.Create(g.Cfg().GetString("static.dir.localBakDir") + "\\static_" + s + ".zip")
+	//
+	//if err == nil {
+	//
+	//	fmt.Println("开始压缩", g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip")
+	//	if err := lib.Zip.Compress(files, compreFile); err != nil {
+	//		fmt.Println("压缩失败,", err)
+	//	}
+	//	fmt.Println("开始拷贝", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
+	//	nBytes, err := lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat")
+	//	if err != nil {
+	//		// 失败拷贝
+	//		lib.Common.CopyFile(g.Cfg().GetString("static.dir.localBakDir")+"\\static_"+s+".zip", g.Cfg().GetString("static.dir.failDir")+"\\static_"+s+".zip")
+	//		fmt.Printf("Copied %d bytes!\n", nBytes)
+	//	}
+	//	fmt.Println("开始重命名", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip")
+	//	if err := os.Rename(g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip.dat", g.Cfg().GetString("static.dir.targetDir")+"\\static_"+s+".zip"); err != nil {
+	//		fmt.Println("rename", err)
+	//	}
+	//}
 	/*******************************************不带密码结束*********************************************/
 
 	fmt.Println("删除临时文件")
