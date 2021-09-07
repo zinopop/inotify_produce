@@ -26,7 +26,7 @@
     # 文件存储相关配置
     [mysql.dir]
         # 文件切分偏移量
-        rowSize = 1000
+        rowSize = 10000
         # 目标目录
         targetDir = "\\\\191.191.191.174\\data2021"
 #        targetDir = "D:\\tag"

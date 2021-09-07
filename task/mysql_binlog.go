@@ -36,7 +36,7 @@ func (m *mysqlBinlog) CreateFile(ch chan string) {
 			ch <- "创建binlog失败"
 		}
 		resultArray := result.Array()
-		otherKey := []string{"contacts", "medias", "targets", "users", "grouplist"}
+		otherKey := []string{"contacts", "medias", "targets", "users", "grouplist", "message_collect"}
 
 		for _, vv := range otherKey {
 			if key, _ := g.Redis().DoVar("KEYS", vv); len(key.Array()) > 0 {
@@ -170,7 +170,8 @@ func createFile(key string, ic chan int) {
 	//	fmt.Println("没有压缩的文件")
 	//}
 	/*******************************************不带密码结束*********************************************/
-
+	time.Sleep(time.Second * 10)
+	fmt.Println("睡")
 	fmt.Println(<-ic)
 	wg.Done()
 }
